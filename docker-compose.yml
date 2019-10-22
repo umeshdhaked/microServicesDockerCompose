@@ -1,0 +1,60 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo-docker
+    network_mode: host
+
+  config:
+    image: config-docker
+    build: configserver/
+    restart: always
+    network_mode: host
+    container_name: config-service
+    ports:
+      - 8888:8888
+    expose:
+      - 8888
+
+  eureka:
+    image: eureka-docker
+    build: eurekaserver/
+    restart: always
+    network_mode: host
+    container_name: eureka-service
+    depends_on:
+      - config
+    ports:
+      - 8761:8761
+    expose:
+      - 8761
+
+  spring:
+    image: spring-mongo
+    build: DockerSpringBootAssignmentTwo/
+    restart: always
+    network_mode: host
+    container_name: spring-docker-app
+    depends_on:
+      - mongo
+      - eureka
+      - config
+    ports:
+      - 8090:8090
+    expose:
+      - 8090
+
+
+  zuul:
+    image: zuul-docker
+    build: netflixzuul/
+    restart: always
+    network_mode: host
+    container_name: zuul-service
+    depends_on:
+      - config
+      - eureka
+    ports:
+      - 8088:8088
+    expose:
+      - 8088
